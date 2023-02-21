@@ -28,6 +28,8 @@ import LaserShaderType from "../shaders/LaserShaderType";
 
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import BasicRecording from "../../Wolfie2D/Playback/BasicRecording";
+import BasicRecorder from "../../Wolfie2D/Playback/BasicRecorder";
+import BasicReplayer from "../../Wolfie2D/Playback/BasicReplayer";
 
 import { HW2Events } from "../HW2Events";
 import Layer from "../../Wolfie2D/Scene/Layer";
@@ -64,6 +66,11 @@ export default class HW2Scene extends Scene {
 
     // A flag to indicate whether or not this scene is being recorded
     private recording: boolean;
+	// Variables to recording gameplay
+	private basicRecording: BasicRecording;
+	private basicRecorder: BasicRecorder;
+	private basicReplayer: BasicReplayer;
+
     // The seed that should be set before the game starts
     private seed: string;
 
@@ -118,7 +125,13 @@ export default class HW2Scene extends Scene {
 	 */
 	public override initScene(options: Record<string, any>): void {
 		this.seed = options.seed === undefined ? RandUtils.randomSeed() : options.seed;
-        this.recording = options.recording === undefined ? false : options.recording; 
+        this.recording = options.recording === undefined ? false : options.recording;
+		RandUtils.seed = this.seed;
+		this.basicRecorder = new BasicRecorder();
+		this.basicRecording = new BasicRecording(HW2Scene, {
+			seed: this.seed
+		});
+		this.basicReplayer = new BasicReplayer(); 
 	}
 	/**
 	 * @see Scene.loadScene()
@@ -173,8 +186,19 @@ export default class HW2Scene extends Scene {
 		this.receiver.subscribe(HW2Events.POP_BUBBLE);
 		this.receiver.subscribe(HW2Events.UPDATE_AIR);
 
+		//Subscribe to recording events
+		this.receiver.subscribe(GameEventType.START_RECORDING);
+		this.receiver.subscribe(GameEventType.STOP_RECORDING);
+		this.receiver.subscribe(GameEventType.PLAY_RECORDING);
+
 		// Subscribe to laser events
 		this.receiver.subscribe(HW2Events.FIRING_LASER);
+
+		if (this.recording){
+			this.emitter.fireEvent(GameEventType.START_RECORDING, {
+				recording: this.basicRecording
+			})
+		}
 	}
 	/**
 	 * @see Scene.updateScene 
@@ -238,6 +262,7 @@ export default class HW2Scene extends Scene {
 				}
 				this.gameOverTimer.start();
 				this.dead = true;
+				this.emitter.fireEvent(GameEventType.STOP_RECORDING);
 				break;
 			}
 			case HW2Events.CHARGE_CHANGE: {
@@ -262,6 +287,21 @@ export default class HW2Scene extends Scene {
 				let currentAir = event.data.get("currentAir");
 				let maxAir = event.data.get("maxAir");
 				this.handleAirChange(currentAir, maxAir);
+				break;
+			}
+			case GameEventType.START_RECORDING: {
+				console.log("STARTED RECORDING!!");
+				this.basicRecorder.start(event.data.get("recording"));
+				break;
+			}
+			case GameEventType.STOP_RECORDING: {
+				console.log("STOPPED RECORDING!!");
+				this.basicRecorder.stop();
+				break;
+			}
+			case GameEventType.PLAY_RECORDING: {
+				console.log("PLAYING RECORDING!!");
+				this.basicReplayer.start(this.basicRecording, event.data.get("onEnd"));
 				break;
 			}
 			default: {
