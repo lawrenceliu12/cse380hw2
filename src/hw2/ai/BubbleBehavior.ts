@@ -3,6 +3,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Graphic from "../../Wolfie2D/Nodes/Graphic";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
+import { HW2Events } from "../HW2Events";
 
 /**
  * A class that represents the behavior of the bubbles in the HW2Scene
@@ -52,6 +53,12 @@ export default class BubbleBehavior implements AI {
 
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
+            case HW2Events.PLAYER_BUBBLE_COLLISION: {
+                let id = event.data.get("id")
+                this.handleBubbleCollision(event, id);
+                break;
+            }
+
             default: {
                 throw new Error("Unhandled event caught in BubbleBehavior! Event type: " + event.type);
             }
@@ -70,6 +77,13 @@ export default class BubbleBehavior implements AI {
 
             // Update position of the bubble - I'm scaling the Vec2.UP and Vec2.LEFT vectors to move the bubble up and to the left
             this.owner.position.add(Vec2.UP.scale(this.currentYSpeed * deltaT)).add(Vec2.LEFT.scale(this.currentXSpeed* deltaT));
+        }
+    }
+
+    protected handleBubbleCollision(event: GameEvent, id: Number): void {
+        if (id === this.owner.id) {
+            this.owner.position.copy(Vec2.ZERO);
+            this.owner.visible = false;
         }
     }
     
