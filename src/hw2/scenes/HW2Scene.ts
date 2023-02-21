@@ -198,6 +198,10 @@ export default class HW2Scene extends Scene {
 		// Handle screen despawning of mines and bubbles
 		for (let mine of this.mines) if (mine.visible) this.handleScreenDespawn(mine);
 		for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
+
+		//PART 5
+		this.wrapPlayer(this.player, this.viewport.getCenter(), this.viewport.getHalfSize());
+		this.lockPlayer(this.player, this.viewport.getCenter(), this.viewport.getHalfSize())
 	}
     /**
      * @see Scene.unloadScene()
@@ -969,7 +973,23 @@ export default class HW2Scene extends Scene {
 	 * 							X THIS IS OUT OF BOUNDS													
 	 */
 	protected wrapPlayer(player: CanvasNode, viewportCenter: Vec2, viewportHalfSize: Vec2): void {
-		// TODO wrap the player around the top/bottom of the screen
+		let top = viewportCenter.y; //o1
+		let bottom = (viewportHalfSize.y) * 2; //O1
+
+		let playerPosition = player.position.y;
+
+		if (playerPosition < top){
+			// console.log("DEBUG top: ", top);
+			let vec2 = new Vec2(player.position.x, bottom);
+			player.position.copy(vec2);
+			return;
+		}
+		if (playerPosition > bottom){
+			// console.log("DEBUG bottom: ", bottom);
+			let vec2 = new Vec2(player.position.x, top);
+			player.position.copy(vec2);
+			return;
+		}
 	}
 
     /**
@@ -1012,7 +1032,22 @@ export default class HW2Scene extends Scene {
 	 * 
 	 */
 	protected lockPlayer(player: CanvasNode, viewportCenter: Vec2, viewportHalfSize: Vec2): void {
-		// TODO prevent the player from moving off the left/right side of the screen
+		let left = (player.position.x - (player.size.x/2))
+		let right = (player.position.x + (player.size.x/2))
+		let maxRight = viewportHalfSize.x * 2;
+
+		if (left < 0){
+			// console.log("DEBUG left lock: ", left);
+			let vec2 = new Vec2(player.size.x / 2, player.position.y)
+			player.position.copy(vec2)
+			return;
+		}
+		if (right > maxRight){
+			// console.log("DEBUG right lock: ", right);
+			let vec2 = new Vec2(maxRight - (player.size.x / 2), player.position.y)
+			player.position.copy(vec2);
+			return;
+		}
 	}
 
 	public handleTimers(): void {
