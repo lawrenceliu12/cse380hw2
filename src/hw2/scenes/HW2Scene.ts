@@ -556,10 +556,10 @@ export default class HW2Scene extends Scene {
 	 * 							X THIS IS OUT OF BOUNDS
 	 */
 	protected spawnBubble(): void {
-		let bubble: Graphic = this.bubbles.find((bubble: Graphic) => { return !bubble.visible });
+		let bubble: Graphic = this.bubbles.find((bubble: CanvasNode) => { return !bubble.visible });
 
 		if (bubble){
-			// Bring this mine to life
+			// Bring this bubble to life
 			bubble.visible = true;
 
 			// Extract the size of the viewport
@@ -567,13 +567,22 @@ export default class HW2Scene extends Scene {
 			let viewportSize = this.viewport.getHalfSize().scaled(2);
 
 			// Loop on position until we're clear of the player
-			bubble.position.copy(RandUtils.randVec(viewportSize.x, paddedViewportSize.x, paddedViewportSize.y - viewportSize.y, viewportSize.y));
+			let x1 = paddedViewportSize.x - viewportSize.x;
+			// console.log("x1", x1)
+			let x2 = viewportSize.x;
+			// console.log("x2", x2)
+			let y1 = viewportSize.y;
+			// console.log("y1", y1)
+			let y2 = paddedViewportSize.y;
+			// console.log("y2", y2)
+
+			bubble.position.copy(RandUtils.randVec(x1, x2, y1, y2));
 			while(bubble.position.distanceTo(this.player.position) < 100){
-				bubble.position.copy(RandUtils.randVec(paddedViewportSize.x, paddedViewportSize.x, paddedViewportSize.y - viewportSize.y, viewportSize.y));
+				bubble.position.copy(RandUtils.randVec(x1, x2, y1, y2));
 			}
 
 			bubble.setAIActive(true, {});
-			// Start the mine spawn timer - spawn a mine every half a second I think
+			// Start the bubble spawn timer - spawn a mine every half a second I think
 			this.bubbleSpawnTimer.start(100);
 
 		}
@@ -622,7 +631,30 @@ export default class HW2Scene extends Scene {
 	 * It may be helpful to make your own drawings while figuring out the math for this part.
 	 */
 	public handleScreenDespawn(node: CanvasNode): void {
-        // TODO - despawn the game nodes when they move out of the padded viewport
+		//Bounds for all directions
+		let right = this.viewport.getHalfSize().scaled(2).x + this.worldPadding.x
+        let left = this.viewport.getOrigin().x - this.worldPadding.x
+		let bottom = this.viewport.getHalfSize().scaled(2).y + this.worldPadding.y
+		let top = this.viewport.getOrigin().y - this.worldPadding.y
+
+		if (node.position.x > right){
+			this.despawn(node);
+		}
+		else if (node.position.x < left){
+			this.despawn(node);
+		}
+		else if (node.position.y > bottom){
+			this.despawn(node);
+		}
+		else if (node.position.y < top){
+			this.despawn(node);
+		}
+	}
+
+	public despawn (node: CanvasNode): void {
+		node.position.copy(Vec2.ZERO);
+		node.visible = false;
+		node.setAIActive(false, {})
 	}
 
 	/** Methods for updating the UI */
