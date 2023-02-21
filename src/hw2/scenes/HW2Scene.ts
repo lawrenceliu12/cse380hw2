@@ -67,6 +67,9 @@ export default class HW2Scene extends Scene {
     // The seed that should be set before the game starts
     private seed: string;
 
+	//A flag to check if you are dead.
+	private dead: boolean;
+
 	// Sprites for the background images
 	private bg1: Sprite;
 	private bg2: Sprite;
@@ -230,7 +233,11 @@ export default class HW2Scene extends Scene {
 				break;
 			}
 			case HW2Events.DEAD: {
+				if (this.dead){
+					break;
+				}
 				this.gameOverTimer.start();
+				this.dead = true;
 				break;
 			}
 			case HW2Events.CHARGE_CHANGE: {
@@ -973,7 +980,7 @@ export default class HW2Scene extends Scene {
 	 * 							X THIS IS OUT OF BOUNDS													
 	 */
 	protected wrapPlayer(player: CanvasNode, viewportCenter: Vec2, viewportHalfSize: Vec2): void {
-		let top = viewportCenter.y; //o1
+		let top = this.viewport.getOrigin().y; //o1
 		let bottom = (viewportHalfSize.y) * 2; //O1
 
 		let playerPosition = player.position.y;
