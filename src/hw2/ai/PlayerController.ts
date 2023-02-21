@@ -233,7 +233,6 @@ export default class PlayerController implements AI {
 	}
 
 	protected handleBubbleCollision (event: GameEvent): void {
-		console.log("In here")
 		this.currentAir = MathUtils.clamp(this.currentAir + 1, this.minAir, this.maxAir);
 	}
 

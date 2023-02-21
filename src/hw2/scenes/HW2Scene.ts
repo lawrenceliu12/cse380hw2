@@ -786,11 +786,11 @@ export default class HW2Scene extends Scene {
 		let numCollisions = 0;
 
 		for (let bubble of this.bubbles){
-			if (HW2Scene.checkAABBtoCircleCollision(this.player.collisionShape as AABB, bubble.collisionShape as Circle)) {
+			if (bubble.visible && HW2Scene.checkAABBtoCircleCollision(this.player.collisionShape as AABB, bubble.collisionShape as Circle)) {
 				this.emitter.fireEvent(HW2Events.PLAYER_BUBBLE_COLLISION, {
 					id: bubble.id
 				});
-				
+
 				this.emitter.fireEvent(HW2Events.POP_BUBBLE, {
 					id: bubble.id
 				});
@@ -822,7 +822,9 @@ export default class HW2Scene extends Scene {
 		let collisions = 0;
 		for (let mine of this.mines) {
 			if (mine.visible && this.player.collisionShape.overlaps(mine.collisionShape)) {
-				this.emitter.fireEvent(HW2Events.PLAYER_MINE_COLLISION, {id: mine.id});
+				this.emitter.fireEvent(HW2Events.PLAYER_MINE_COLLISION, {
+					id: mine.id
+				});
 				collisions += 1;
 			}
 		}	
@@ -871,8 +873,21 @@ export default class HW2Scene extends Scene {
 	 * @see MathUtils for more information about MathUtil functions
 	 */
 	public static checkAABBtoCircleCollision(aabb: AABB, circle: Circle): boolean {
-        // TODO implement collision detection for AABBs and Circles
-        return;
+        let dx = circle.x - aabb.x;
+		let px = aabb.hw + circle.hw - Math.abs(dx);
+
+		if (px <= 0){
+			return false;
+		}
+		else{
+			let dy = circle.y - aabb.y;
+			let py = aabb.hh + circle.hh - Math.abs(dy);
+
+			if (py <= 0){
+				return false;
+			}
+			return true;
+		}
 	}
 
     /** Methods for locking and wrapping nodes */
