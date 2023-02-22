@@ -25,7 +25,7 @@ export default class BasicRecorder implements Recorder<BasicRecording, BasicLogI
 
 		//CHANGED WHAT TO SUBSCRIBE TO SO QUEUE WILL NOT BECOME FULL
 		this._receiver.subscribe(
-			[GameEventType.MOUSE_DOWN, GameEventType.MOUSE_UP, 
+			[GameEventType.MOUSE_DOWN, GameEventType.MOUSE_UP,
 			GameEventType.KEY_DOWN, GameEventType.KEY_UP, GameEventType.CANVAS_BLUR]
 		);
 	}

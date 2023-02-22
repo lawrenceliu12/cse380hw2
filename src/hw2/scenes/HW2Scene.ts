@@ -127,6 +127,7 @@ export default class HW2Scene extends Scene {
 		this.seed = options.seed === undefined ? RandUtils.randomSeed() : options.seed;
         this.recording = options.recording === undefined ? false : options.recording;
 		RandUtils.seed = this.seed;
+		console.log("SEED", this.seed);
 		this.basicRecorder = new BasicRecorder();
 		this.basicRecording = new BasicRecording(HW2Scene, {
 			seed: this.seed
