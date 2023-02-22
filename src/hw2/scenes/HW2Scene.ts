@@ -215,7 +215,7 @@ export default class HW2Scene extends Scene {
 		this.moveBackgrounds(deltaT);
 
 		// Handles mine and bubble collisions
-		this.handleMinePlayerCollisions();
+		this.minesDestroyed += this.handleMinePlayerCollisions();
 		this.bubblesPopped += this.handleBubblePlayerCollisions();
 
 		// Handle timers
@@ -263,7 +263,6 @@ export default class HW2Scene extends Scene {
 				}
 				this.gameOverTimer.start();
 				this.dead = true;
-				this.emitter.fireEvent(GameEventType.STOP_RECORDING);
 				break;
 			}
 			case HW2Events.CHARGE_CHANGE: {
@@ -411,7 +410,9 @@ export default class HW2Scene extends Scene {
 		this.bubbleSpawnTimer = new Timer(2500);
 		this.bubbleSpawnTimer.start();
 
-		this.gameOverTimer = new Timer(3000);
+		this.gameOverTimer = new Timer(3000, () => {
+			this.emitter.fireEvent(GameEventType.STOP_RECORDING);
+		});
 	}
 	/**
 	 * Initializes the background image sprites for the game.
@@ -906,10 +907,15 @@ export default class HW2Scene extends Scene {
 		let collisions = 0;
 		for (let mine of this.mines) {
 			if (mine.visible && this.player.collisionShape.overlaps(mine.collisionShape)) {
-				this.emitter.fireEvent(HW2Events.PLAYER_MINE_COLLISION, {
-					id: mine.id
-				});
-				collisions += 1;
+				if (!mine.frozen){
+					this.emitter.fireEvent(HW2Events.PLAYER_MINE_COLLISION, {
+						id: mine.id
+					});
+					if (!this.dead){
+						collisions += 1;
+					}
+					mine.freeze();
+				}
 			}
 		}	
 		return collisions;
